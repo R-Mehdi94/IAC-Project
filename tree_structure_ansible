@@ -1,0 +1,13 @@
+nom_du_role/
+├── tasks/ # Tâches principales du rôle
+│ └── main.yml
+├── handlers/ # Handlers
+│ └── main.yml
+├── templates/ # Templates Jinja2
+│ └── ...
+├── files/ # Fichiers statiques
+│ └── ...
+├── vars/ # Variables par défaut pour le rôle
+│ └── main.yml
+└── defaults/ # Variables par défaut avec la plus faible priorité
+ └── main.yml

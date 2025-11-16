@@ -1,0 +1,18 @@
+- name: Installer le serveur MySQL et ses dépendances
+  apt:
+    name: ["mysql-server", "python3-mysqldb"]
+    state: present
+
+- name: Démarrer et activer le service MySQL
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+
+- name: Définir le mot de passe root de MySQL
+  mysql_user:
+    name: root
+    password: "{{ mysql_root_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    check_implicit_admin: yes
+  ignore_errors: yes

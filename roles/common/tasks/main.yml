@@ -1,0 +1,13 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for common
+
+- name: Exécuter les mises à jour du système
+  ansible.builtin.import_tasks: system-update.yml
+
+- name: Configurer le fuseau horaire
+  ansible.builtin.import_tasks: timezone.yml
+
+- name: Installer les paquets de base
+  ansible.builtin.import_tasks: install-packages.yml  
+

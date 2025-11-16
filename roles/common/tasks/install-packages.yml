@@ -1,0 +1,7 @@
+- name: Install common packages
+  ansible.builtin.apt:
+    name:
+      - ufw
+      - git
+      - htop
+    state: present
