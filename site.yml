@@ -12,3 +12,10 @@
   roles:
     - role: mysql
       tags: [db]  
+
+- name : Configuration des serveurs web
+  hosts: staging_web:prod_web
+  become: yes
+  roles:
+    - role: nginx
+      tags: [nginx]

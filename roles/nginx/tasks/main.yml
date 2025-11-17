@@ -1,3 +1,7 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # tasks file for nginx
+
+
+- name: Installation de Nginx
+  ansible.builtin.import_tasks: install-nginx.yml

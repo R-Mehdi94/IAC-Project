@@ -1,0 +1,47 @@
+---
+- name: Install nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+
+- name: Start and enable nginx service
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true
+
+- name: Remove default nginx configuration (symbolic link)
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Reload Nginx 
+
+- name: Remove default nginx configuration
+  ansible.builtin.file:
+    path: /etc/nginx/sites-available/default
+    state: absent
+
+- name: Copy Nginx configuration template
+  ansible.builtin.template:
+    src: conf.j2
+    dest: /etc/nginx/sites-available/kapsulekorp.conf 
+    owner: root
+    group: root
+    mode: '0644'
+    validate: 'sh -c "nginx -t && test -f %s"'  
+  notify: Reload Nginx
+
+- name: Activate the site (symlink sites-enabled -> sites-available)
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/kapsulekorp.conf
+    dest: /etc/nginx/sites-enabled/kapsulekorp.conf
+    state: link
+  notify: Reload Nginx
+
+- name: Copy index.html to Nginx root directory
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: /var/www/html/index.html 
+    owner: root
+    group: root
+    mode: '0644'
