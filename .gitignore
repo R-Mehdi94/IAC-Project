@@ -1,0 +1,16 @@
+# .gitignore pour Terraform
+
+# Les dossiers locaux de Terraform (plugins, binaires)
+.terraform/
+.terraform.lock.hcl
+
+# Les fichiers d'état (TRÈS IMPORTANT : Ne jamais push ça)
+*.tfstate
+*.tfstate.backup
+
+# Les fichiers de variables qui contiennent souvent des secrets
+*.tfvars
+*.auto.tfvars
+
+# Les fichiers de crash log
+crash.log
