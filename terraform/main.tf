@@ -13,29 +13,101 @@ provider "google" {
   zone    = "us-central1-a"
 }
 
-resource "google_compute_instance" "vm_ansible_test" {
-  count        = 3 
-  name         = "vm-${count.index}"
-  machine_type = "e2-micro" 
+resource "google_compute_instance" "staging_web" {
+  count        = 2
+  name         = "staging-web-${count.index + 1}" # Donnera staging-web-1, staging-web-2
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-minimal-2210-kinetic-amd64-v20230126"
-      size  = 10 
+      image = "ubuntu-os-cloud/ubuntu-2204-lts"
+      size  = 10
     }
   }
-
   network_interface {
     network = "default"
-    access_config {
-      # Ephemeral IP
+    access_config {} # Permet d'avoir une IP publique
+  }
+  metadata = {
+    ssh-keys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
+  }
+}
+
+resource "google_compute_instance" "staging_db" {
+  count        = 1
+  name         = "staging-db-1"
+  machine_type = "e2-micro"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-2204-lts"
+      size  = 10
     }
   }
-  
-  # Optionnel : Pour payer encore moins cher si vous sortez du cadre gratuit
-  scheduling {
-    preemptible = true
-    automatic_restart = false
+  network_interface {
+    network = "default"
+    access_config {}
   }
+  metadata = {
+    ssh-keys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
+  }
+}
+
+# --- PROD ---
+
+resource "google_compute_instance" "prod_web" {
+  count        = 3
+  name         = "prod-web-${count.index + 1}"
+  machine_type = "e2-micro"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-2204-lts"
+      size  = 10
+    }
+  }
+  network_interface {
+    network = "default"
+    access_config {}
+  }
+  metadata = {
+    ssh-keys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
+  }
+}
+
+resource "google_compute_instance" "prod_db" {
+  count        = 1
+  name         = "prod-db-1"
+  machine_type = "e2-micro"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-2204-lts"
+      size  = 10
+    }
+  }
+  network_interface {
+    network = "default"
+    access_config {}
+  }
+  metadata = {
+    ssh-keys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
+  }
+}
+
+
+#ressource pour générer le fichier d'inventaire Ansible avec les adresses IP de chaque instance
+resource "local_file" "ansible_inventory" {
+  content = templatefile("inventory.tftpl", {
+    # On récupère les IPs de chaque groupe
+    staging_web_ips = google_compute_instance.staging_web[*].network_interface.0.access_config.0.nat_ip
+    staging_db_ips  = google_compute_instance.staging_db[*].network_interface.0.access_config.0.nat_ip
+    prod_web_ips    = google_compute_instance.prod_web[*].network_interface.0.access_config.0.nat_ip
+    prod_db_ips     = google_compute_instance.prod_db[*].network_interface.0.access_config.0.nat_ip
+  })
+  filename = "${path.module}/inventory.ini"
 }

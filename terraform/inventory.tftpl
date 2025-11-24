@@ -1,0 +1,28 @@
+[staging_web]
+%{ for index, ip in staging_web_ips ~}
+stagingweb${index + 1} ansible_host=${ip} ansible_user=ubuntu
+%{ endfor ~}
+
+[staging_db]
+%{ for index, ip in staging_db_ips ~}
+stagingdb${index + 1} ansible_host=${ip} ansible_user=ubuntu
+%{ endfor ~}
+
+[prod_web]
+%{ for index, ip in prod_web_ips ~}
+prodweb${index + 1} ansible_host=${ip} ansible_user=ubuntu
+%{ endfor ~}
+
+[prod_db]
+%{ for index, ip in prod_db_ips ~}
+proddb${index + 1} ansible_host=${ip} ansible_user=ubuntu
+%{ endfor ~}
+
+# --- Groupes parents ---
+[staging:children]
+staging_web
+staging_db
+
+[production:children]
+prod_web
+prod_db
