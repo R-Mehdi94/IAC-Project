@@ -18,7 +18,7 @@ resource "google_compute_instance" "staging_web" {
   name         = "staging-web-${count.index + 1}" # Donnera staging-web-1, staging-web-2
   machine_type = "e2-micro"
   zone         = "us-central1-a"
-
+  tags = ["web"]
   boot_disk {
     initialize_params {
       image = "ubuntu-os-cloud/ubuntu-2204-lts"
@@ -62,7 +62,7 @@ resource "google_compute_instance" "prod_web" {
   name         = "prod-web-${count.index + 1}"
   machine_type = "e2-micro"
   zone         = "us-central1-a"
-
+  tags = ["web"]
   boot_disk {
     initialize_params {
       image = "ubuntu-os-cloud/ubuntu-2204-lts"
@@ -110,4 +110,20 @@ resource "local_file" "ansible_inventory" {
     prod_db_ips     = google_compute_instance.prod_db[*].network_interface.0.access_config.0.nat_ip
   })
   filename = "${path.module}/inventory.ini"
+}
+
+
+
+resource "google_compute_firewall" "rules" {
+  name        = "my-firewall-rule"
+  network     = "default"
+  description = "Creates firewall rule targeting tagged instances"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "443","81"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["web"]
 }

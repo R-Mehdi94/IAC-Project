@@ -1,7 +1,15 @@
 - name: Install common packages
   ansible.builtin.apt:
     name:
+      - python3-pip
       - ufw
       - git
       - htop
     state: present
+
+- name: Installer  PyMySQL pour Ansible  sur les serveurs db
+  ansible.builtin.pip:
+    name: PyMySQL
+    state: present
+  # Ceci s'assure que PyMySQL est installé sur les machines de base de données (staging_db et prod_db)
+  when: inventory_hostname in groups['staging_db'] or inventory_hostname in groups['prod_db']    

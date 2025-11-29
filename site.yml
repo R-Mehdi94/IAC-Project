@@ -19,3 +19,11 @@
   roles:
     - role: nginx
       tags: [nginx]
+
+
+- name: Installation et configuration de PHP
+  hosts: staging_web:prod_web
+  become: yes
+  roles:
+    - role: php
+      tags: [php]

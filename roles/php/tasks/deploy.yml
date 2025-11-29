@@ -1,0 +1,18 @@
+ 
+
+- name: Créer le répertoire de l'application (utilisé comme root par Nginx)
+  ansible.builtin.file:
+    path: /var/www/kapsulekorp
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: Déploiement des fichiers sources de l'application PHP
+  ansible.builtin.copy:
+    src: files/app_sources/
+    dest: /var/www/kapsulekorp/
+    owner: www-data
+    group: www-data
+    mode: '0644'
+  tags: deployment

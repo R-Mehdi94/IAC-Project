@@ -1,0 +1,9 @@
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for roles/php
+# roles/php-fpm/handlers/main.yml
+
+- name: reload php-fpm
+  ansible.builtin.service:
+    name: php{{ php_version }}-fpm
+    state: reloaded

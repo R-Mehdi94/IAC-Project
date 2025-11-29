@@ -1,0 +1,10 @@
+#SPDX-License-Identifier: MIT-0
+---
+
+  # tasks file for roles/php
+- name: Installation de PHP
+  ansible.builtin.import_tasks: install-php.yml
+
+- name: Exécuter le déploiement de l'application
+  ansible.builtin.include_tasks: deploy.yml  
+

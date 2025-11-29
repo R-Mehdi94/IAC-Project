@@ -38,10 +38,10 @@
     state: link
   notify: Reload Nginx
 
-- name: Copy index.html to Nginx root directory
-  ansible.builtin.template:
-    src: index.html.j2
-    dest: /var/www/html/index.html 
-    owner: root
-    group: root
-    mode: '0644'
+- name: Créer le répertoire de l'application
+  ansible.builtin.file:
+    path: /var/www/kapsulekorp  
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
