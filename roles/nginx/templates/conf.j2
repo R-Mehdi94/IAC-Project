@@ -4,10 +4,27 @@ server {
 
        server_name iac.ubuntu.com;
 
-       root /var/www/html;
-       index index.html;
+       root /var/www/kapsulekorp;
+       index index.php index.html index.htm;
 
        location / {
                try_files $uri $uri/ =404;
        }
+       location ~ \.php$ {
+        
+        # Le chemin  standard pour PHP-FPM
+        include snippets/fastcgi-php.conf; 
+
+       
+        # 'ADRESSE DE CONNEXION    dans pool.conf.j2
+        fastcgi_pass unix:/run/php/php{{ php_version }}-fpm-app_pool.sock;
+        
+        # Paramètres pour que PHP-FPM sache quel fichier exécuter
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+    # Empêche  acces aux fichiers cachés (.ht, .git, etc.)
+    location ~ /\. {
+        deny all;
+    }
 }
