@@ -39,6 +39,7 @@ resource "google_compute_instance" "staging_db" {
   name         = "staging-db-1"
   machine_type = "e2-micro"
   zone         = "us-central1-a"
+  tags = ["db"]
 
   boot_disk {
     initialize_params {
@@ -83,7 +84,7 @@ resource "google_compute_instance" "prod_db" {
   name         = "prod-db-1"
   machine_type = "e2-micro"
   zone         = "us-central1-a"
-
+  tags = ["db"]
   boot_disk {
     initialize_params {
       image = "ubuntu-os-cloud/ubuntu-2204-lts"
@@ -109,7 +110,8 @@ resource "local_file" "ansible_inventory" {
     prod_web_ips    = google_compute_instance.prod_web[*].network_interface.0.access_config.0.nat_ip
     prod_db_ips     = google_compute_instance.prod_db[*].network_interface.0.access_config.0.nat_ip
   })
-  filename = "${path.module}/inventory.ini"
+  filename = "${path.module}/../inventory.ini"
+
 }
 
 
@@ -126,4 +128,18 @@ resource "google_compute_firewall" "rules" {
 
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["web"]
+}
+
+resource "google_compute_firewall" "allow_mysql" {
+  name    = "allow-mysql"
+  network = "default"
+  description = "Allow MySQL connections from web servers"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["3306"]
+  }
+
+  source_tags = ["web"]
+  target_tags = ["db"]
 }

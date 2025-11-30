@@ -10,6 +10,13 @@
     state: started
     enabled: yes
 
+- name: Ensure MySQL listens on all interfaces
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^bind-address'
+    line: 'bind-address = 0.0.0.0'
+  notify: Restart MySQL    
+
 - name: Verify if root can login without password
   command: mysql -uroot -e "SELECT 1"
   register: mysql_root_can_login_without_password
@@ -32,3 +39,23 @@
     owner: root
     group: root
     mode: "0600"
+
+
+
+- name: Create application database
+  community.mysql.mysql_db:
+    name: "{{ db_name }}"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+
+- name: Create application user
+  community.mysql.mysql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    host: "%"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+

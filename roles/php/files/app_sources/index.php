@@ -1,5 +1,5 @@
 <?php
-$serverName = "localhost";
+$serverName = "34.63.79.70";
 $dbUser = "webapp_user";
 $dbPassword = "UnAutreMotDePasseSolide";
 $dbName = "webapp_db";
