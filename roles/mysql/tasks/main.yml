@@ -1,10 +1,5 @@
-#SPDX-License-Identifier: MIT-0
----
-# tasks file for mysql
-
 - name: Installation de MySQL
   ansible.builtin.import_tasks: install-mysql.yml
 
 - name: Configuration de la base de données MySQL
   ansible.builtin.import_tasks: configure-db.yml
-

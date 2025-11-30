@@ -1,28 +1,24 @@
 <?php
-$servername = "localhost";
-// $password = "UnAutreMotDePasseSolide";
-// $dbname = "webapp_db";
+$serverName = "localhost";
+$dbUser = "webapp_user";
+$dbPassword = "UnAutreMotDePasseSolide";
+$dbName = "webapp_db";
 
-// $mysql_root_password = "UnMotDePasseRootTresComplexe";
-$db_name = "webapp_db";
-$db_user = "webapp_user";
-$db_password = "UnAutreMotDePasseSolide";
+$dbConnection = new mysqli($serverName, $dbUser, $dbPassword, $dbName);
 
-$conn = new mysqli($servername, $db_user, $db_password, $db_name);
-
-if ($conn->connect_error) {
-    echo "<h1> DÉPLOIEMENT RÉUSSI, MAIS...</h1>";
-    echo "<p>La connexion à MySQL a échoué. Problème de réseau ou d'identifiants.</p>";
-    die("Erreur: " . $conn->connect_error);
+if ($dbConnection->connect_error) {
+    echo "<h1>DEPLOY SUCCESSFUL BUT...</h1>";
+    echo "<p>The connection with MySQL has failed. Error with network or credentials.</p>";
+    die("Error: " . $dbConnection->connect_error);
 }
 
 
-echo "<h1> Bienvenue à KapsuleKorp!</h1>";
-echo "<h3>Infrastructure as Code (IaC) - Déploiement PHP-LEMP réussi!</h3>";
-echo "<p>La base de données <strong>'$dbname'</strong> a été jointe avec succès!</p>";
+echo "<h1>Welcome to KapsuleKorp!</h1>";
+echo "<h3>Infrastructure as Code - Deployment PHP-LEMP successful!</h3>";
+echo "<p>The database <strong>'$dbname'</strong> is connected!</p>";
 
-$result = $conn->query("SELECT VERSION()");
+$result = $dbConnection->query("SELECT VERSION()");
 $row = $result->fetch_row();
-echo "<p>Version de MySQL: " . $row[0] . "</p>";
+echo "<p>MySQL version: " . $row[0] . "</p>";
 
-$conn->close();
+$dbConnection->close();

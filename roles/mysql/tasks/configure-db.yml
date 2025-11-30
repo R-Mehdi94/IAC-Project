@@ -1,15 +1,11 @@
-- name: Créer la base de données de l'application
+- name: Create the database of the application
   mysql_db:
     name: "{{ db_name }}"
     state: present
-    login_user: root
-    login_password: "{{ mysql_root_password }}"
 
-- name: Créer l'utilisateur de la base de données
+- name: Create the user of the database
   mysql_user:
     name: "{{ db_user }}"
     password: "{{ db_password }}"
     priv: "{{ db_name }}.*:ALL"
     state: present
-    login_user: root
-    login_password: "{{ mysql_root_password }}"

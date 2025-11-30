@@ -1,19 +1,34 @@
-- name: Installer le serveur MySQL et ses dépendances
+- name: Install MySql server and the dependencies
   apt:
-    name: ["mysql-server", "python3-mysqldb"]
+    name: [ "mysql-server", "python3-mysqldb" ]
     state: present
+  update_cache: yes
 
-- name: Démarrer et activer le service MySQL
+- name: Start and activate the MySQL service
   service:
     name: mysql
     state: started
     enabled: yes
 
-- name: Définir le mot de passe root de MySQL
+- name: Verify if root can login without password
+  command: mysql -uroot -e "SELECT 1"
+  register: mysql_root_can_login_without_password
+  failed_when: false
+  changed_when: false
+
+- name: Set a root password of MySQL (only for the first run)
   community.mysql.mysql_user:
     name: root
     password: "{{ mysql_root_password }}"
     login_unix_socket: /var/run/mysqld/mysqld.sock
     state: present
     check_implicit_admin: yes
-  ignore_errors: yes
+  when: mysql_root_can_login_without_password.rc == 0
+
+- name: Create /root/.my.cnf for MySQL for later logins
+  template:
+    src: root-my.cnf.j2
+    dest: /root/.my.cnf
+    owner: root
+    group: root
+    mode: "0600"
