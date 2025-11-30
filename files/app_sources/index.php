@@ -1,9 +1,14 @@
 <?php
 $servername = "localhost";
-$password = "UnAutreMotDePasseSolide";
-$dbname = "webapp_db";
+// $password = "UnAutreMotDePasseSolide";
+// $dbname = "webapp_db";
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+// $mysql_root_password = "UnMotDePasseRootTresComplexe";
+$db_name = "webapp_db";
+$db_user = "webapp_user";
+$db_password = "UnAutreMotDePasseSolide";
+
+$conn = new mysqli($servername, $db_user, $db_password, $db_name);
 
 if ($conn->connect_error) {
     echo "<h1> DÉPLOIEMENT RÉUSSI, MAIS...</h1>";
