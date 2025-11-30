@@ -1,9 +1,11 @@
 <?php
-$serverName = "{{ hostvars['stagingdb1']['ansible_host'] }}";
+ 
+$serverName = "{{ mysql_host }}";
 $dbUser     = "{{ db_user }}";
 $dbPassword = "{{ db_password }}";
 $dbName     = "{{ db_name }}";
-
+$envName    = "{{ env_name }}";
+ 
 $dbConnection = new mysqli($serverName, $dbUser, $dbPassword, $dbName);
 
 if ($dbConnection->connect_error) {
@@ -12,13 +14,14 @@ if ($dbConnection->connect_error) {
     die("Error: " . $dbConnection->connect_error);
 }
 
-
+ 
 echo "<h1>Welcome to KapsuleKorp!</h1>";
 echo "<h3>Infrastructure as Code - Deployment PHP-LEMP successful!</h3>";
-echo "<p>The database <strong>'$dbname'</strong> is connected!</p>";
-
+echo "<p>Environment: <strong>$envName</strong></p>";
+ 
 $result = $dbConnection->query("SELECT VERSION()");
 $row = $result->fetch_row();
 echo "<p>MySQL version: " . $row[0] . "</p>";
 
 $dbConnection->close();
+?>
