@@ -1,8 +1,8 @@
 <?php
-$serverName = "34.63.79.70";
-$dbUser = "webapp_user";
-$dbPassword = "UnAutreMotDePasseSolide";
-$dbName = "webapp_db";
+$serverName = "{{ hostvars['stagingdb1']['ansible_host'] }}";
+$dbUser     = "{{ db_user }}";
+$dbPassword = "{{ db_password }}";
+$dbName     = "{{ db_name }}";
 
 $dbConnection = new mysqli($serverName, $dbUser, $dbPassword, $dbName);
 

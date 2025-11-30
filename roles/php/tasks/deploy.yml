@@ -9,10 +9,17 @@
     mode: '0755'
 
 - name: Déploiement des fichiers sources de l'application PHP
-  ansible.builtin.copy:
-    src: files/app_sources/
-    dest: /var/www/kapsulekorp/
+  ansible.builtin.template:
+    src: index.php.j2
+    dest: /var/www/kapsulekorp/index.php   
     owner: www-data
     group: www-data
     mode: '0644'
   tags: deployment
+
+- name: Fix PHP-FPM log permissions
+  file:
+    path: /var/log/php8.1-fpm.log
+    owner: www-data
+    group: www-data
+    mode: '0664'
