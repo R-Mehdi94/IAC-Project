@@ -1,38 +1,200 @@
-Role Name
-=========
+ 
 
-A brief description of the role goes here.
+Ce projet vise à déployer automatiquement une application PHP/MySQL appelée KapsuleKorp dans deux environnements :
 
-Requirements
-------------
+Staging
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+Production
 
-Role Variables
---------------
+Grâce à deux outils :
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Terraform → crée l’infrastructure (VM, firewall, réseau…)
 
-Dependencies
-------------
+Ansible → configure les serveurs (Nginx, PHP, MySQL) + déploie l'application
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+##1. Architecture du projet
+terraform/           → Provision des VM et firewall sur GCP
+roles/
+   common/           → Configuration système de base
+   mysql/            → Installation + config MySQL
+   nginx/            → Installation + configuration Nginx
+   php/              → PHP-FPM + déploiement de l’application
+group_vars/          → Variables par environnement (vault)
+host_vars/           → Secrets propres à chaque serveur (vault)
+site.yml             → Playbook principal Ansible
+ansible.cfg          → Config Ansible
+inventory.ini        → Généré automatiquement par Terraform
 
-Example Playbook
-----------------
+☁️ 2. Infrastructure (Terraform)
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+Terraform crée :
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+2 machines web (prod/staging)
 
-License
--------
+2 machines db (prod/staging)
 
-BSD
+Une règle firewall :
 
-Author Information
-------------------
+Les web peuvent joindre les db sur MySQL (3306)
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Un inventory.ini pour Ansible (automatique)
+
+Commandes Terraform
+cd terraform
+terraform init
+terraform apply -auto-approve
+
+
+Une fois terminé, Terraform génère un fichier inventory.ini.
+
+🛠️ 3. Configuration (Ansible)
+
+Le playbook principal site.yml applique 4 rôles :
+
+common → configuration système
+
+mysql → installation MySQL / création DB + user
+
+nginx → installation / configuration du vhost
+
+php → installation PHP-FPM / pools / déploiement de l'app
+
+📦 4. Description rapide des rôles
+🔧 Rôle “common”
+
+Applique les réglages communs à tous les serveurs :
+
+Update système (apt dist-upgrade)
+
+Change timezone → Europe/Paris
+
+Installe packages utiles : git, htop, ufw, python3-pip
+
+Installe PyMySQL sur les serveurs DB pour Ansible
+
+🗄️ Rôle “mysql”
+
+Concerne uniquement les serveurs de base de données.
+
+Il :
+
+installe MySQL Server
+
+démarre et active le service
+
+crée :
+
+la base de données
+
+l’utilisateur applicatif
+
+le fichier /root/.my.cnf pour permettre à Ansible de se connecter sans mot de passe
+
+applique le mot de passe root (via vault)
+
+🌐 Rôle “nginx”
+
+Sur les serveurs web :
+
+installe Nginx
+
+supprime la conf par défaut
+
+déploie une conf dédiée :
+
+écoute sur port 81
+
+docroot → /var/www/kapsulekorp
+
+envoi des .php vers PHP-FPM
+
+active le site + reload Nginx
+
+🐘 Rôle “php”
+
+Sur les serveurs web :
+
+installe PHP-FPM
+
+installe les modules nécessaires (définis dans les variables)
+
+désactive le pool par défaut
+
+crée un pool spécifique pour l’application
+
+déploie l'application :
+
+/var/www/kapsulekorp/index.php
+
+test de connexion MySQL
+
+retour visuel "KapsuleKorp - Deployment successful"
+
+🔐 5. Gestion des secrets (Ansible Vault)
+
+Les mots de passe DB, root MySQL, etc. sont dans :
+
+group_vars/staging/*.yml
+host_vars/*/*.yml
+
+
+Tous sont chiffrés avec Ansible Vault.
+
+Commandes utiles
+
+Créer un vault :
+
+ansible-vault create group_vars/staging/db_vault.yml
+
+
+Éditer :
+
+ansible-vault edit group_vars/staging/db_vault.yml
+
+
+Exécuter le playbook avec vault :
+
+ansible-playbook -i inventory.ini site.yml --ask-vault-pass
+
+🚀 6. Déploiement complet (résumé)
+1️⃣ Provisionner l’infrastructure (Terraform)
+cd terraform
+terraform init
+terraform apply
+
+
+→ Les VM sont créées
+→ L’inventory Ansible est généré
+
+2️⃣ Exécuter Ansible
+ansible-playbook -i inventory.ini site.yml --ask-vault-pass
+
+
+Tous les rôles sont appliqués automatiquement.
+
+3️⃣ Tester l’application
+
+Ouvrir :
+
+http://IP_DU_SERVEUR_WEB:81/
+
+
+Tu devrais voir :
+
+✔ Déploiement réussi
+✔ Environnement (staging ou production)
+✔ Version du serveur MySQL
+✔ Connexion DB OK
+
+📝 7. Commandes globales (récap rapide)
+Terraform
+terraform init
+terraform plan
+terraform apply
+terraform destroy
+
+Ansible
+ansible-playbook -i inventory.ini site.yml
+ansible-vault create fichier.yml
+ansible-vault edit fichier.yml
+ansible-vault encrypt fichier.yml
